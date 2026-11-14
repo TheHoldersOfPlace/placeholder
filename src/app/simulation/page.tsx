@@ -15,4 +15,5 @@ const SimulationPage = () => {
     );
 }
 
+
 export default SimulationPage;
