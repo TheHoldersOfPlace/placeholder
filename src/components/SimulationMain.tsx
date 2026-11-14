@@ -168,6 +168,7 @@ export default function SimulationMain() {
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         mount.appendChild(renderer.domElement);
+        
 
         // allows content to be resized when window is resized
         const resize = () => {
