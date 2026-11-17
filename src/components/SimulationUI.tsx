@@ -20,7 +20,8 @@ export default function SimulationUI() {
     const [theta, setTheta] = useState(10); // launch angle (degrees)
     const [source, setSource] = useState(1500); // source depth
     const [thermocline, setThermocline] = useState(-2);
-    const [depth, setDepth] = useState(2500);
+    //const [depth, setDepth] = useState(2500);
+    const depth = 2500; // fixed depth
 
     // ui vars
     const x_pad = 50;
