@@ -10,12 +10,15 @@
   },
   "dependencies": {
     "next": "16.4.6",
+    "papaparse": "^5.7.1",
+    "plotly.js-dist-min": "^4.3.0",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "4.3.3",
     "@types/node": "^20",
+    "@types/papaparse": "^5.5.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
