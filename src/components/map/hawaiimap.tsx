@@ -240,7 +240,7 @@ export default function HawaiiMap() {
   );
 
   return (
-    <section className="w-full space-y-4">
+    <section className="min-h-screen w-full space-y-4 bg-white p-4 text-zinc-900">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <label className="flex flex-col gap-2 text-sm font-medium">
           Heatmap CSV
