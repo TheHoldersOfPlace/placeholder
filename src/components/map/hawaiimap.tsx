@@ -1,8 +1,6 @@
 "use client";
 
-import Papa from "papaparse";
 import { useEffect, useRef, useState } from "react";
-import type { ChangeEvent } from "react";
 import type { Data, Layout } from "plotly.js-dist-min";
 
 const FEATURES = {
@@ -33,7 +31,7 @@ const REQUIRED_COLUMNS = [
 ] as const;
 
 type FeatureKey = keyof typeof FEATURES;
-type HeatmapRow = Record<string, string>;
+type HeatmapRow = Record<string, string | number>;
 
 interface Cell {
   key: string;
@@ -46,9 +44,11 @@ interface Cell {
   maximumDepth: number;
 }
 
-function asFiniteNumber(value: string | undefined): number | null {
-  if (value == null || value.trim() === "") return null;
-  const number = Number(value);
+function asFiniteNumber(value: string | number | undefined): number | null {
+  if (value == null) return null;
+  const stringValue = String(value).trim();
+  if (stringValue === "") return null;
+  const number = Number(stringValue);
   return Number.isFinite(number) ? number : null;
 }
 
@@ -58,47 +58,71 @@ function colorScaleForFeature(featureKey: FeatureKey) {
   return "Turbo";
 }
 
+async function fetchDataFromPostgres(): Promise<HeatmapRow[]> {
+  try {
+    const response = await fetch("/api/heatmap-data");
+    if (!response.ok) {
+      throw new Error(`Failed to fetch data: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    throw new Error(
+      `Could not fetch data from database: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
+    );
+  }
+}
+
 export default function HawaiiMap() {
   const [rows, setRows] = useState<HeatmapRow[]>([]);
   const [featureKey, setFeatureKey] = useState<FeatureKey>("temperature");
-  const [status, setStatus] = useState(
-    "Choose a hawaii_heatmap.csv file to display the gridded map.",
-  );
+  const [status, setStatus] = useState("Loading data from database...");
   const mapRef = useRef<HTMLDivElement>(null);
 
-  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  useEffect(() => {
+    let cancelled = false;
 
-    Papa.parse<HeatmapRow>(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete(result) {
-        if (result.errors.length > 0) {
-          setRows([]);
-          setStatus(`Could not read the CSV: ${result.errors[0].message}`);
-          return;
-        }
+    async function loadData() {
+      try {
+        const data = await fetchDataFromPostgres();
+        if (cancelled) return;
 
-        const headers = result.meta.fields ?? [];
         const missingColumns = REQUIRED_COLUMNS.filter(
-          (column) => !headers.includes(column),
+          (column) =>
+            !data.some(
+              (row) =>
+                row[column] !== undefined &&
+                row[column] !== null &&
+                row[column] !== ""
+            )
         );
         if (missingColumns.length > 0) {
           setRows([]);
-          setStatus(`CSV is missing required columns: ${missingColumns.join(", ")}`);
+          setStatus(
+            `Data is missing required columns: ${missingColumns.join(", ")}`
+          );
           return;
         }
 
-        setRows(result.data);
-        setStatus(`${result.data.length.toLocaleString()} rows loaded.`);
-      },
-      error(error) {
-        setRows([]);
-        setStatus(`Could not read the CSV: ${error.message}`);
-      },
-    });
-  }
+        setRows(data);
+        setStatus(`${data.length.toLocaleString()} rows loaded from database.`);
+      } catch (error) {
+        if (!cancelled) {
+          setRows([]);
+          setStatus(
+            error instanceof Error ? error.message : "Failed to load data"
+          );
+        }
+      }
+    }
+
+    void loadData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -118,7 +142,7 @@ export default function HawaiiMap() {
         (row) =>
           asFiniteNumber(row.grid_latitude) != null &&
           asFiniteNumber(row.grid_longitude) != null &&
-          asFiniteNumber(row[feature.heatmapColumn]) != null,
+          asFiniteNumber(row[feature.heatmapColumn]) != null
       );
 
       if (validRows.length === 0) {
@@ -161,7 +185,7 @@ export default function HawaiiMap() {
 
       const visibleCells = [...cells.values()];
       const values = visibleCells.map(
-        (cell) => cell.weightedValue / cell.totalWeight,
+        (cell) => cell.weightedValue / cell.totalWeight
       );
 
       const trace: Data = {
@@ -172,7 +196,7 @@ export default function HawaiiMap() {
         customdata: visibleCells.map((cell) => cell.key),
         marker: {
           size: visibleCells.map((cell) =>
-            Math.max(5, Math.min(13, 4 + Math.sqrt(cell.profileCount))),
+            Math.max(5, Math.min(13, 4 + Math.sqrt(cell.profileCount)))
           ),
           color: values,
           colorscale: colorScaleForFeature(featureKey),
@@ -236,27 +260,19 @@ export default function HawaiiMap() {
         void import("plotly.js-dist-min").then((Plotly) => Plotly.purge(map));
       }
     },
-    [],
+    []
   );
 
   return (
     <section className="min-h-screen w-full space-y-4 bg-white p-4 text-zinc-900">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <label className="flex flex-col gap-2 text-sm font-medium">
-          Heatmap CSV
-          <input
-            type="file"
-            accept=".csv,text/csv"
-            onChange={handleFileChange}
-            className="max-w-full rounded-md border border-zinc-300 bg-white p-2 text-sm"
-          />
-        </label>
-
-        <label className="flex flex-col gap-2 text-sm font-medium">
           Map feature
           <select
             value={featureKey}
-            onChange={(event) => setFeatureKey(event.target.value as FeatureKey)}
+            onChange={(event) =>
+              setFeatureKey(event.target.value as FeatureKey)
+            }
             className="rounded-md border border-zinc-300 bg-white p-2 text-sm"
           >
             {Object.entries(FEATURES).map(([key, feature]) => (
