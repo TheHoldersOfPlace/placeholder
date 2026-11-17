@@ -1,7 +1,11 @@
+
 'use client' // adding reactivity
 
 import { useState, useEffect } from "react";
 import { Card, Col, Form, Row } from "react-bootstrap";
+import SoundSpeedProfile, {
+  type SoundSpeedPoint,
+} from "@/components/charts/SoundSpeedProfile";
 
 // data inputs; will change later to pipe in from map
 let theta = 0.; // launch angle
@@ -9,6 +13,7 @@ let z_s = 10; // source depth
 let g_t = -2.; // thermocline gradient
 let d = 500; // total ocean depth (m)
 
+const EMPTY_MEASUREMENTS: SoundSpeedPoint[] = [];
 
 // ui labels and buttons
 export default function SimulationUI() {
@@ -39,7 +44,6 @@ export default function SimulationUI() {
     let source_coords = {x: x_pad, y: convertDepth(source)}; // coords in ui space
     const surfaceY = convertDepth(0); // water surface
 
-
     let speed = 1.5; // temp
     const rayLength = 360; // display length only
 
@@ -51,7 +55,7 @@ export default function SimulationUI() {
     // steps:
         // use mckenzie's law to calculate sound speed via temp, depth, salinity
         // use sound speed for snells law
-        // use THAT 
+        // use THAT
 
     // reflection
     const outgoingLength = 180;
@@ -85,41 +89,106 @@ export default function SimulationUI() {
         };
 
         frame = requestAnimationFrame(animate);
-        return () => cancelAnimationFrame(frame); // cancels upon unmounting
+        return () => cancelAnimationFrame(frame);
     }, []);
 
-
     // ui / visual formatting here
-    
+
     return (
-        <div id="sim-main" className="absolute left-8 top-1/2 z-10 -translate-y-1/2">
+        <div id="sim-main" className="absolute left-8 top-[15%] z-10 origin-top-left scale-[1.65]">
             <Row>
-                <Col>
-                    {/* other graph on the left? */}
-                    <text fill="white">testing</text>
+                <Col className="relative">
+                    {/* Sound speed profile graph */}
+                    <div className="absolute left-0 top-4 w-[240px]">
+                        <SoundSpeedProfile measurements={EMPTY_MEASUREMENTS} />
+                    </div>
+
+                    {/* Sliders below sound speed profile */}
+                    <div className="absolute left-0 top-[375px] w-[320px] origin-top-left scale-[0.606]">
+                        <Form>
+                            <Form.Group className="mb-3">
+                                <Form.Label htmlFor="angle">
+                                    Launch angle: {theta}°
+                                </Form.Label>
+                                <Form.Range
+                                    id="angle"
+                                    min={-45}
+                                    max={45}
+                                    step={1}
+                                    value={theta}
+                                    onChange={(event) => setTheta(Number(event.target.value))}
+                                />
+                            </Form.Group>
+
+                            <Form.Group className="mb-3">
+                                <Form.Label htmlFor="source">
+                                    Source depth: {source} m
+                                </Form.Label>
+                                <Form.Range
+                                    id="source"
+                                    min={0}
+                                    max={depth}
+                                    step={10}
+                                    value={source}
+                                    onChange={(event) => setSource(Number(event.target.value))}
+                                />
+                            </Form.Group>
+
+                            <Form.Group className="mb-3">
+                                <Form.Label htmlFor="thermocline">
+                                    Thermocline gradient: {thermocline}
+                                </Form.Label>
+                                <Form.Range
+                                    id="thermocline"
+                                    min={-10}
+                                    max={0}
+                                    step={0.1}
+                                    value={thermocline}
+                                    onChange={(event) => setThermocline(Number(event.target.value))}
+                                />
+                            </Form.Group>
+                        </Form>
+                    </div>
                 </Col>
+
                 <Col className="w-170 translate-x-1/3">
-                
+
                     {/* main simulation ui */}
                     <svg
                         viewBox="0 0 500 300"
                         role="img"
-                        >
+                    >
                         {/* y axis*/}
-                        <line x1={x_pad} y1="0" x2={x_pad} y2={y_height} stroke="white" strokeWidth="2"/>
-                        
+                        <line
+                            x1={x_pad}
+                            y1="0"
+                            x2={x_pad}
+                            y2={y_height}
+                            stroke="white"
+                            strokeWidth="2"
+                        />
+
                         {/* ray */}
                         <line
-                            x1={source_coords.x} y1={source_coords.y} x2={endpoint.x} y2={endpoint.y}
-                            stroke="red" strokeWidth="2"
+                            x1={source_coords.x}
+                            y1={source_coords.y}
+                            x2={endpoint.x}
+                            y2={endpoint.y}
+                            stroke="red"
+                            strokeWidth="2"
                         />
+
                         {hitsTop && (
                             <line
-                            x1={endpoint.x} y1={endpoint.y} x2={reflectedEnd.x} y2={reflectedEnd.y}
-                            stroke="red" strokeWidth="2"
-                        />
+                                x1={endpoint.x}
+                                y1={endpoint.y}
+                                x2={reflectedEnd.x}
+                                y2={reflectedEnd.y}
+                                stroke="red"
+                                strokeWidth="2"
+                            />
                         )}
-                        
+
                         {/* axis labels */}
                         <text x="14" y={spacing(0)} fill="white" fontFamily="Courier" fontSize="10">0m</text>
                         <text x="14" y={spacing(1)} fill="white" fontFamily="Courier" fontSize="10">500m</text>
@@ -130,50 +199,6 @@ export default function SimulationUI() {
                     </svg>
                 </Col>
             </Row>
-            <Row className="absolute">
-                {/* Sliders for inputs */}
-                <Form >
-                    <Form.Group className="mb-3">
-                        <Form.Label htmlFor="angle">Launch angle: {theta}°</Form.Label>
-                        <Form.Range
-                        id="angle"
-                        min={-45}
-                        max={45}
-                        step={1}
-                        value={theta}
-                        onChange={(event) => setTheta(Number(event.target.value))}
-                        />
-                    </Form.Group>
-                      <Form.Group className="mb-3">
-                        <Form.Label htmlFor="source">Source depth: {source} m</Form.Label>
-                        <Form.Range
-                        id="source"
-                        min={0}
-                        max={depth}
-                        step={10}
-                        value={source}
-                        onChange={(event) => setSource(Number(event.target.value))}
-                        />
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                        <Form.Label htmlFor="thermocline">
-                        Thermocline gradient: {thermocline}
-                        </Form.Label>
-                        <Form.Range
-                        id="thermocline"
-                        min={-10}
-                        max={0}
-                        step={0.1}
-                        value={thermocline}
-                        onChange={(event) => setThermocline(Number(event.target.value))}
-                        />
-                    </Form.Group>
-                </Form>
-            </Row>
-
-
         </div>
-        
     );
-
 }
