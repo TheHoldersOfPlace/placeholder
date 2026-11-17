@@ -40,7 +40,7 @@ export default function SimulationUI() {
     const surfaceY = convertDepth(0); // water surface
 
 
-    let speed = 1.5; // temp
+    let speed = 1500.; // temp
     const rayLength = 360; // display length only
 
     // ok wait i need a ray for:
