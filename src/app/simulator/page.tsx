@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Card, Col, Container, Row } from 'react-bootstrap';
+import { Button, Card, Col, Container, Row } from 'react-bootstrap';
 import SimulationMain from "../../components/SimulationMain";
 import SimulationUI from "../../components/SimulationUI";
 
@@ -10,6 +10,7 @@ export default function SimulatorPage() {
             <section className="absolute inset-0 z-10 p-8 text-white">
                 <h1>Sound Speed Simulation</h1>
                 <SimulationUI />
+                <Button href="/" variant="primary">Home</Button> 
             </section>
         </main>
   );
