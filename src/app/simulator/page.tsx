@@ -8,6 +8,7 @@ export default function SimulatorPage() {
     <main className="relative min-h-screen overflow-hidden">
             <SimulationMain /> 
             <section className="absolute inset-0 z-10 p-8 text-white">
+                <Link href="/">← Home</Link>
                 <h1>Sound Speed Simulation</h1>
                 <SimulationUI />
             </section>
