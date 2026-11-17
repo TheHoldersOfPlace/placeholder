@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Station {
+  profileId       Int    @id @map("profile_id")
+  sourceFile      String @map("source_file")
+  instrument      String
+  latitude        Float
+  longitude       Float
+  year            Int
+  month           Int
+  day             Int
+  timeUtcHours    Float  @map("time_utc_hours")
+  validLevels     Int    @map("valid_levels")
+  minDepthM       Float  @map("min_depth_m")
+  maxDepthM       Float  @map("max_depth_m")
+  soundSpeedMinMS Float  @map("sound_speed_min_m_s")
+  soundSpeedMaxMS Float  @map("sound_speed_max_m_s")
+
+  measurements Measurement[]
+
+  @@map("stations")
+}
+
+model Measurement {
+  profileId            Int   @map("profile_id")
+  depthM               Float @map("depth_m")
+  pressureDbarEst      Float @map("pressure_dbar_est")
+  temperatureC         Float @map("temperature_c")
+  salinityPsu          Float @map("salinity_psu")
+  soundSpeedMS         Float @map("sound_speed_m_s")
+  depthQc              Int   @map("depth_qc") @db.SmallInt
+  temperatureQc        Int   @map("temperature_qc") @db.SmallInt
+  salinityQc           Int   @map("salinity_qc") @db.SmallInt
+  temperatureProfileQc Int   @map("temperature_profile_qc") @db.SmallInt
+  salinityProfileQc    Int   @map("salinity_profile_qc") @db.SmallInt
+
+  station Station @relation(fields: [profileId], references: [profileId])
+
+  @@id([profileId, depthM])
+  @@map("measurements")
+}
+
+model HeatmapCell {
+  period            String
+  depthM            Float   @map("depth_m")
+  gridLatitude      Float   @map("grid_latitude")
+  gridLongitude     Float   @map("grid_longitude")
+  gridLatMin        Float   @map("grid_lat_min")
+  gridLonMin        Float   @map("grid_lon_min")
+  nProfiles         Int     @map("n_profiles")
+  temperatureCMean  Float   @map("temperature_c_mean")
+  salinityPsuMean   Float   @map("salinity_psu_mean")
+  soundSpeedMSMean  Float   @map("sound_speed_m_s_mean")
+  instruments       String
+  sufficientSamples Boolean @map("sufficient_samples")
+
+  @@id([period, depthM, gridLatitude, gridLongitude])
+  @@map("heatmap_cells")
+}
+
+model FilterReport {
+  source String
+  stage  String
+  count  Int
+
+  @@id([source, stage])
+  @@map("filter_report")
+}
