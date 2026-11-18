@@ -104,7 +104,7 @@ export default function SimulationUI() {
                     </div>
 
                     {/* Sliders below sound speed profile */}
-                    <div className="absolute left-0 top-[375px] w-[320px] origin-top-left scale-[0.606]">
+                    <div className="absolute left-0 top-[370px] w-[320px] origin-top-left scale-[0.606]">
                         <Form>
                             <Form.Group className="mb-3">
                                 <Form.Label htmlFor="angle">
