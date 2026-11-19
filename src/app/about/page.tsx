@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "About | AquaSonics",
@@ -93,6 +94,7 @@ export default function AboutPage() {
       {/* Hero */}
       <section className="grid items-center gap-12 py-16 md:grid-cols-[1.2fr_1fr] md:py-24">
         <div>
+          <Link href="/">← Home</Link>
           <p className={eyebrow}>About the project</p>
           <h1 className="text-5xl font-bold tracking-tight sm:text-6xl">
             AquaSonics
