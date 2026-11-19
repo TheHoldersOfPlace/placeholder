@@ -10,7 +10,9 @@ export default function SimulatorPage() {
             <section className="absolute inset-0 z-10 p-8 text-white">
                 <h1>Sound Speed Simulation</h1>
                 <SimulationUI />
-                <Button href="/" variant="primary">Home</Button> 
+                <Link href="/" className="rounded border px-4 py-2 hover:bg-gray-100">
+                  Home
+                </Link> 
             </section>
         </main>
   );

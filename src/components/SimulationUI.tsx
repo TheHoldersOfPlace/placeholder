@@ -2,12 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { Card, Col, Form, Row } from "react-bootstrap";
+import * as d3 from "d3";
 
 // data inputs; will change later to pipe in from map
 let theta = 0.; // launch angle
 let z_s = 10; // source depth
 let g_t = -2.; // thermocline gradient
 let d = 500; // total ocean depth (m)
+
+
+// helper functions
+
 
 
 // ui labels and buttons
@@ -42,6 +47,8 @@ export default function SimulationUI() {
 
     let speed = 1500.; // temp
     const rayLength = 360; // display length only
+
+
 
     // ok wait i need a ray for:
         // launch angle (NOT the final sound speed ray)
@@ -87,6 +94,18 @@ export default function SimulationUI() {
         frame = requestAnimationFrame(animate);
         return () => cancelAnimationFrame(frame); // cancels upon unmounting
     }, []);
+
+
+
+    // moving circle(s) along ray path (using sound speed from data table)
+    //var svg = d3.select("body").append("svg")
+    //    .attr("width",960)
+    //    .attr("height",500);
+
+    //var points = [[0,0]]; // beginning and end point of this line; reference end points from above (TODO)
+
+    
+    
 
 
     // ui / visual formatting here
