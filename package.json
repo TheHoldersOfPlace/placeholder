@@ -12,11 +12,12 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
-    "dotenv": "^18.0.10",
     "d3": "^7.9.2",
+    "dotenv": "^18.0.10",
     "next": "16.4.6",
     "papaparse": "^5.7.1",
     "pg": "^8.23.1",
+    "plotly": "^1.0.6",
     "plotly.js": "^4.3.0",
     "plotly.js-dist-min": "^4.3.0",
     "react": "19.3.0",
