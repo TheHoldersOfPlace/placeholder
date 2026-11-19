@@ -97,7 +97,7 @@ export default function AboutPage() {
         <div className="relative pt-28 md:pt-0">
 
           {/* Placeholders logo centered above AquaSonics */}
-          <div className="pointer-events-none absolute left-0 top-0 flex w-[320px] max-w-full justify-center md:-top-32 md:w-[370px]">
+          <div className="pointer-events-none absolute left-13 top-0 flex w-[320px] max-w-full justify-center md:-top-32 md:w-[370px]">
             <Image
               src="/img/TransparentPlaceholderLogo.png"
               alt="Placeholders Logo"
