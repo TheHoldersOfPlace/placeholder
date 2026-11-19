@@ -13,6 +13,7 @@
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
     "dotenv": "^18.0.10",
+    "d3": "^7.9.2",
     "next": "16.4.6",
     "papaparse": "^5.7.1",
     "pg": "^8.23.1",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "4.3.3",
+    "@types/d3": "^7.4.3",
     "@types/node": "^20",
     "@types/papaparse": "^5.5.2",
     "@types/pg": "^8.23.1",

@@ -6,6 +6,7 @@ import { Card, Col, Form, Row } from "react-bootstrap";
 import SoundSpeedProfile, {
   type SoundSpeedPoint,
 } from "@/components/charts/SoundSpeedProfile";
+import * as d3 from "d3";
 
 // data inputs; will change later to pipe in from map
 let theta = 0.; // launch angle
@@ -14,6 +15,10 @@ let g_t = -2.; // thermocline gradient
 let d = 500; // total ocean depth (m)
 
 const EMPTY_MEASUREMENTS: SoundSpeedPoint[] = [];
+
+// helper functions
+
+
 
 // ui labels and buttons
 export default function SimulationUI() {
@@ -44,8 +49,11 @@ export default function SimulationUI() {
     let source_coords = {x: x_pad, y: convertDepth(source)}; // coords in ui space
     const surfaceY = convertDepth(0); // water surface
 
-    let speed = 1.5; // temp
+
+    let speed = 1500.; // temp
     const rayLength = 360; // display length only
+
+
 
     // ok wait i need a ray for:
         // launch angle (NOT the final sound speed ray)
