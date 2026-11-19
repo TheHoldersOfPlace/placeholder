@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "About | AquaSonics",
@@ -93,7 +94,18 @@ export default function AboutPage() {
     <main className="mx-auto w-full max-w-6xl px-4 font-sans sm:px-8">
       {/* Hero */}
       <section className="grid items-center gap-12 py-16 md:grid-cols-[1.2fr_1fr] md:py-24">
-        <div>
+        <div className="relative pt-28 md:pt-0">
+
+          {/* Placeholders logo centered above AquaSonics */}
+          <div className="pointer-events-none absolute left-0 top-0 flex w-[320px] max-w-full justify-center md:-top-32 md:w-[370px]">
+            <Image
+              src="/img/TransparentPlaceholderLogo.png"
+              alt="Placeholders Logo"
+              width={1120}
+              height={485}
+              className="h-auto w-[230px] brightness-0 dark:invert"
+            />
+           </div>
           <Link href="/">← Home</Link>
           <p className={eyebrow}>About the project</p>
           <h1 className="text-5xl font-bold tracking-tight sm:text-6xl">
