@@ -115,8 +115,8 @@ export default function SimulationUI() {
                     <div className="absolute left-0 top-[370px] w-[320px] origin-top-left scale-[0.606]">
                         <Form>
                             <Form.Group className="mb-3">
-                                <Form.Label htmlFor="angle">
-                                    Launch angle: {theta}°
+                                <Form.Label htmlFor="angle" className="d-block">
+                                    Launch angle: <span className="inline-block w-16 text-right tabular-nums">{theta}°</span>
                                 </Form.Label>
                                 <Form.Range
                                     id="angle"
@@ -129,8 +129,8 @@ export default function SimulationUI() {
                             </Form.Group>
 
                             <Form.Group className="mb-3">
-                                <Form.Label htmlFor="source">
-                                    Source depth: {source} m
+                                <Form.Label htmlFor="source" className="d-block">
+                                    Source depth: <span className="inline-block w-16 text-right tabular-nums">{source} m</span>
                                 </Form.Label>
                                 <Form.Range
                                     id="source"
@@ -143,8 +143,8 @@ export default function SimulationUI() {
                             </Form.Group>
 
                             <Form.Group className="mb-3">
-                                <Form.Label htmlFor="thermocline">
-                                    Thermocline gradient: {thermocline}
+                                <Form.Label htmlFor="thermocline" className="d-block">
+                                    Thermocline gradient: <span className="inline-block w-16 text-right tabular-nums">{thermocline}</span>
                                 </Form.Label>
                                 <Form.Range
                                     id="thermocline"
