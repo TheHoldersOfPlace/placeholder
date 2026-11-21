@@ -45,7 +45,7 @@ function SoundSpeedProfile({
   return (
     // This creates the dark container surrounding our graph.
     // I adjusted its height, width, border, and background to fit the simulation page.
-    <div className="h-[353px] w-full rounded-lg border border-white/20 bg-slate-950/90">
+    <div className="h-[303px] w-full rounded-lg border border-white/20 bg-slate-950/90">
 
       {/* This displays the title at the top of the graph. */}
       <h2 className="p-3 text-center text-sm font-semibold text-white">
@@ -131,7 +131,7 @@ function SoundSpeedProfile({
           }}
 
           // I adjusted the graph's dimensions to fit inside the SSP container.
-          style={{ width: '100%', height: '298px' }}
+          style={{ width: '100%', height: '248px' }}
 
         />
       )}

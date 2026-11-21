@@ -36,7 +36,7 @@ export default function SimulationUI() {
     // ui vars
     const x_pad = 50;
     const y_max = y_height - 5;
-    const y_min = 10; // i dont know
+    const y_min = 10;
     const label_num = 6; // 6 total labels from 0-2500m
     let spacing = (i: number) => {return y_min + i * (y_max-y_min)/(label_num-1)}; // inputs 0-5
     // ^ basically represents ui-space 500m
@@ -49,42 +49,96 @@ export default function SimulationUI() {
     let source_coords = {x: x_pad, y: convertDepth(source)}; // coords in ui space
     const surfaceY = convertDepth(0); // water surface
 
-
-    let speed = 1500.; // temp
-    const rayLength = 360; // display length only
-
-
-
-    // ok wait i need a ray for:
-        // launch angle (NOT the final sound speed ray)
-        // final sound speed
-        // reflected ray (if any)
-
-    // steps:
-        // use mckenzie's law to calculate sound speed via temp, depth, salinity
-        // use sound speed for snells law
-        // use THAT
-
     // reflection
-    const outgoingLength = 180;
         const hitDistance =
         Math.abs(dy) < 1e-6
             ? -1
             : (surfaceY - source_coords.y) / dy;
 
-    const hitsTop = dy < 0 && hitDistance > 0;
+    const distanceToSvgEdge = (
+        x: number,
+        y: number,
+        directionX: number,
+        directionY: number
+    ) => {
+        const xDistance = directionX > 0
+            ? (x_length - x) / directionX
+            : directionX < 0
+                ? -x / directionX
+                : Infinity;
+        const yDistance = directionY > 0
+            ? (y_height - y) / directionY
+            : directionY < 0
+                ? -y / directionY
+                : Infinity;
+        const distance = Math.min(xDistance, yDistance);
+
+        return {
+            x: x + distance * directionX,
+            y: y + distance * directionY,
+        };
+    };
+
+    const initialRayEdge = distanceToSvgEdge(
+        source_coords.x,
+        source_coords.y,
+        dx,
+        dy
+    );
+    const edgeDistance = Math.hypot(
+        initialRayEdge.x - source_coords.x,
+        initialRayEdge.y - source_coords.y
+    );
+    const hitsTop =
+        dy < 0 && hitDistance > 0 && hitDistance < edgeDistance;
 
     const endpoint = hitsTop
     ? { x: source_coords.x + hitDistance * dx, y: surfaceY }
-    : {
-        x: source_coords.x + rayLength * dx,
-        y: source_coords.y + rayLength * dy,
-        };
+    : initialRayEdge;
 
-    const reflectedEnd = {
-    x: endpoint.x + outgoingLength * dx,
-    y: endpoint.y - outgoingLength * dy,
-    };
+    const reflectedEnd = distanceToSvgEdge(endpoint.x, endpoint.y, dx, -dy);
+
+    // circle to show sound speed
+    let speed = 1500.; // temp; will draw from map values later
+    const xAxisMeters = 2500;
+    const scaled_units = x_length/xAxisMeters;
+    const circleSpeed = speed * scaled_units;
+
+    const firstSegmentLength = Math.hypot(
+    endpoint.x - source_coords.x,
+    endpoint.y - source_coords.y
+    );
+
+    const secondSegmentLength = hitsTop
+        ? Math.hypot(
+            reflectedEnd.x - endpoint.x,
+            reflectedEnd.y - endpoint.y
+        )
+        : 0;
+
+    const totalLength = firstSegmentLength + secondSegmentLength;
+    const particlePositions = [0, 0.5, 1].map((timeOffset) => {
+        const distance = (
+            (circleSpeed * (time - timeOffset)) % totalLength + totalLength
+        ) % totalLength;
+
+        if (distance <= firstSegmentLength) {
+            const progress = distance / firstSegmentLength;
+
+            return {
+                x: source_coords.x + (endpoint.x - source_coords.x) * progress,
+                y: source_coords.y + (endpoint.y - source_coords.y) * progress,
+            };
+        }
+
+        const progress =
+            (distance - firstSegmentLength) / secondSegmentLength;
+
+        return {
+            x: endpoint.x + (reflectedEnd.x - endpoint.x) * progress,
+            y: endpoint.y + (reflectedEnd.y - endpoint.y) * progress,
+        };
+    });
 
     // enabling animation with requestAnimationFrame
     useEffect(() => {
@@ -112,49 +166,55 @@ export default function SimulationUI() {
                     </div>
 
                     {/* Sliders below sound speed profile */}
-                    <div className="absolute left-0 top-[370px] w-[320px] origin-top-left scale-[0.606]">
+                    <div className="absolute left-0 top-[320px] w-[320px] origin-top-left scale-[0.606]">
                         <Form>
-                            <Form.Group className="mb-3">
-                                <Form.Label htmlFor="angle">
-                                    Launch angle: {theta}°
-                                </Form.Label>
-                                <Form.Range
-                                    id="angle"
-                                    min={-45}
-                                    max={45}
-                                    step={1}
-                                    value={theta}
-                                    onChange={(event) => setTheta(Number(event.target.value))}
-                                />
-                            </Form.Group>
+                            <div className="grid grid-cols-2 gap-4">
+                                <Form.Group className="mb-3">
+                                    <Form.Label htmlFor="angle" className="d-block">
+                                        Launch angle: {theta}°
+                                    </Form.Label>
+                                    <Form.Range
+                                        id="angle"
+                                        min={-45}
+                                        max={45}
+                                        step={1}
+                                        value={theta}
+                                        className="w-[150px]"
+                                        onChange={(event) => setTheta(Number(event.target.value))}
+                                    />
+                                </Form.Group>
 
-                            <Form.Group className="mb-3">
-                                <Form.Label htmlFor="source">
-                                    Source depth: {source} m
-                                </Form.Label>
-                                <Form.Range
-                                    id="source"
-                                    min={0}
-                                    max={depth}
-                                    step={10}
-                                    value={source}
-                                    onChange={(event) => setSource(Number(event.target.value))}
-                                />
-                            </Form.Group>
+                                <Form.Group className="mb-3">
+                                    <Form.Label htmlFor="source" className="d-block whitespace-nowrap">
+                                        Source depth: {source} m
+                                    </Form.Label>
+                                    <Form.Range
+                                        id="source"
+                                        min={0}
+                                        max={depth}
+                                        step={10}
+                                        value={source}
+                                        className="w-[150px]"
+                                        onChange={(event) => setSource(Number(event.target.value))}
+                                    />
+                                </Form.Group>
 
-                            <Form.Group className="mb-3">
-                                <Form.Label htmlFor="thermocline">
-                                    Thermocline gradient: {thermocline}
-                                </Form.Label>
-                                <Form.Range
-                                    id="thermocline"
-                                    min={-10}
-                                    max={0}
-                                    step={0.1}
-                                    value={thermocline}
-                                    onChange={(event) => setThermocline(Number(event.target.value))}
-                                />
-                            </Form.Group>
+                                <Form.Group className="mb-3">
+                                    <Form.Label htmlFor="thermocline" className="d-block whitespace-nowrap">
+                                        Thermocline gradient: {thermocline}
+                                    </Form.Label>
+                                    <Form.Range
+                                        id="thermocline"
+                                        min={-5}
+                                        max={0}
+                                        step={0.1}
+                                        value={thermocline}
+                                        className="w-[150px]"
+                                        onChange={(event) => setThermocline(Number(event.target.value))}
+                                    />
+                                </Form.Group>
+                            </div>
+
                         </Form>
                     </div>
                 </Col>
@@ -173,7 +233,7 @@ export default function SimulationUI() {
                             x2={x_pad}
                             y2={y_height}
                             stroke="white"
-                            strokeWidth="2"
+                            strokeWidth="1"
                         />
 
                         {/* ray */}
@@ -182,21 +242,31 @@ export default function SimulationUI() {
                             y1={source_coords.y}
                             x2={endpoint.x}
                             y2={endpoint.y}
-                            stroke="red"
-                            strokeWidth="2"
+                            stroke="white"
+                            strokeWidth="1.5"
                         />
-
+                        {/* reflected ray, if any */}
                         {hitsTop && (
                             <line
                                 x1={endpoint.x}
                                 y1={endpoint.y}
                                 x2={reflectedEnd.x}
                                 y2={reflectedEnd.y}
-                                stroke="red"
-                                strokeWidth="2"
+                                stroke="white"
+                                strokeWidth="1.5"
                             />
                         )}
 
+                        {/* Circle for speed */}
+                        {particlePositions.map((position, index) => (
+                            <circle
+                                key={index}
+                                cx={position.x}
+                                cy={position.y}
+                                r="3"
+                                fill="red"
+                            />
+                        ))}
                         {/* axis labels */}
                         <text x="14" y={spacing(0)} fill="white" fontFamily="Courier" fontSize="10">0m</text>
                         <text x="14" y={spacing(1)} fill="white" fontFamily="Courier" fontSize="10">500m</text>
